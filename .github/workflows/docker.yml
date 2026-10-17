@@ -53,8 +53,11 @@ jobs:
           file: Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
+          # 在这里加上 build-args 传入代理
+          build-args: |
+            GOPROXY=https://goproxy.cn,direct
           tags: |
-            ghcr.io/metatube-community/metatube-server:dev
+            ghcr.io/${{ github.repository_owner }}/metatube-server:dev
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
