@@ -1,11 +1,19 @@
 FROM golang:alpine AS builder
 
+# 在最顶部声明 ARG，以便 docker build 时传入
+ARG GOPROXY=https://proxy.golang.org,direct
+FROM golang:alpine AS builder
+
 WORKDIR /src
 COPY . /src
+
+# 将外部传进来的 GOPROXY 赋予环境变量
+ENV GOPROXY=$GOPROXY
 
 RUN apk add --update --no-cache --no-progress make git \
     && make server
 
+# 后续的运行阶段保持不变...
 FROM alpine:latest
 LABEL org.opencontainers.image.licenses=Apache-2.0
 LABEL org.opencontainers.image.source="https://github.com/metatube-community/metatube-sdk-go"
@@ -14,6 +22,9 @@ COPY --from=builder /src/build/metatube-server .
 
 RUN apk add --update --no-cache --no-progress ca-certificates tzdata
 
+ENV GIN_MODE=release
+ENV PORT=8080
+# ... (其余环境变量保持不变)
 ENV GIN_MODE=release
 ENV PORT=8080
 ENV TOKEN=""
